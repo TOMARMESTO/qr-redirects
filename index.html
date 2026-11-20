@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>QR</title>
+
+  <style>
+
+    body {
+
+      font-family: Arial, sans-serif;
+
+      background: #f4f4f4;
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+      min-height: 100vh;
+
+      margin: 0;
+
+      text-align: center;
+
+    }
+
+    .card {
+
+      background: white;
+
+      padding: 35px;
+
+      border-radius: 15px;
+
+      max-width: 400px;
+
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="card">
+
+    <h2 id="titulo">QR</h2>
+
+    <p id="mensaje">Verificando código...</p>
+
+  </div>
+
+  <script>
+
+    const id = new URLSearchParams(window.location.search).get("id");
+
+    const titulo = document.getElementById("titulo");
+
+    const mensaje = document.getElementById("mensaje");
+
+    if (!id) {
+
+      titulo.textContent = "Código QR";
+
+      mensaje.textContent = "Código no válido.";
+
+    } else {
+
+      titulo.textContent = "Código " + id;
+
+      fetch("redirects.json")
+
+        .then(response => {
+
+          if (!response.ok) throw new Error("No se pudo cargar");
+
+          return response.json();
+
+        })
+
+        .then(data => {
+
+          const destino = data[id];
+
+          if (!destino) {
+
+            mensaje.textContent = "Este QR todavía no está activado.";
+
+            return;
+
+          }
+
+          const url = new URL(destino);
+
+          if (url.protocol !== "https:" && url.protocol !== "http:") {
+
+            throw new Error("Destino no válido");
+
+          }
+
+          mensaje.textContent = "Redirigiendo...";
+
+          window.location.replace(url.href);
+
+        })
+
+        .catch(() => {
+
+          mensaje.textContent = "No se pudo verificar el código. Intentá nuevamente.";
+
+        });
+
+    }
+
+  </script>
+
+</body>
+
+</html>
